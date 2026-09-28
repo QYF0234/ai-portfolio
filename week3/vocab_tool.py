@@ -1,7 +1,7 @@
 import csv
 import os
 
-# 兼容老师的 weekpath 模块，如果报错自动降级使用标准路径
+# 兼容 weekpath 模块，如果报错自动降级使用标准路径
 try:
     import weekpath
     DATA_PATH = weekpath.data_path("生词表.csv")
@@ -23,7 +23,7 @@ def load_words(path=DATA_PATH):
         reader = csv.DictReader(f)
         words = list(reader)
         
-        # 容错检查（PPT第9页强调 KeyError 的第一大来源）
+        # 容错检查
         if not words:
             print("⚠️ CSV 文件为空！")
             return []
