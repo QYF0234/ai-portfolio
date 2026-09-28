@@ -9,7 +9,53 @@
 > 示例输出：用“坚持”造一个句子。（动词）。
 
 ## 2. AI 初版代码
-（此处可以简单总结一句，比如：AI最初给出的代码使用了绝对路径，且没有处理CSV表头报错的情况。）
+import csv
+import weekpath
+
+# 定位数据文件
+DATA = weekpath.data_path("生词表.csv")
+OUT = weekpath.root_path("练习.txt")
+
+# ① 读：读取CSV
+def load_words(path=DATA):
+    with open(path, encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+# ② 筛：按HSK等级筛选 (AI最初使用传统的for循环)
+def filter_by_level(words, level="4"):
+    result = []
+    for w in words:
+        if str(w["HSK等级"]).strip() == str(level):
+            result.append(w)
+    return result
+
+# ③ 统：统计词性分布 (AI使用了普通的字典键值操作)
+def count_by_pos(words):
+    d = {}
+    for w in words:
+        pos = w["词性"]
+        if pos in d:
+            d[pos] = d[pos] + 1
+        else:
+            d[pos] = 1
+    return d
+
+# ④ 写：生成练习题 (AI最初只生成了造句练习)
+def gen_exercises(words, out=OUT):
+    with open(out, "w", encoding="utf-8") as f:
+        for w in words:
+            f.write(f"用“{w['词汇']}”造一个句子。（{w['词性']}）\n")
+
+# 主程序运行
+if __name__ == "__main__":
+    all_words = load_words()
+    hsk4_words = filter_by_level(all_words, level="4")
+    pos_stats = count_by_pos(hsk4_words)
+    print(f"总词汇: {len(all_words)}, HSK4词汇: {len(hsk4_words)}")
+    print(f"词性分布: {pos_stats}")
+    gen_exercises(hsk4_words)
+    print("练习.txt 生成完毕！")
+
 
 ## 3. 我的修改点（≥3条，重点部分）
 1. **修正了字段名防报错**：AI原版直接使用 `w["HSK等级"]`，我根据 PPT 第9页强调的“KeyError 第一大来源”，在代码里加上了表头检查 `if "HSK等级" not in first_row:`，防止不同版本的CSV列名不一致导致崩溃。
