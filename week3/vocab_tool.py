@@ -40,7 +40,7 @@ def filter_by_level(words, level="4"):
     """筛选指定等级的词汇"""
     return [w for w in words if str(w["HSK等级"]).strip() == str(level)]
 
-# ③ 统：统计词性分布 (作业1延伸：使用字典get()方法)
+# ③ 统：统计词性分布 
 def count_by_pos(words):
     """统计词性"""
     pos_dict = {}
@@ -49,7 +49,7 @@ def count_by_pos(words):
         pos_dict[pos] = pos_dict.get(pos, 0) + 1
     return pos_dict
 
-# ④ 写：生成练习题 (作业2扩展：生成造句和填空题)
+# ④ 写：生成练习题
 def gen_exercises(words, out=OUTPUT_PATH):
     """生成练习文件"""
     with open(out, "w", encoding="utf-8") as f:
