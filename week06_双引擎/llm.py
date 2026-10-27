@@ -2,7 +2,7 @@
 # 依赖：pip install openai requests python-dotenv
 import os
 import sys
-import time  # 【作业1新增】导入时间模块用于计算耗时
+import time 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import weekpath  # noqa: E402  跨周导入 + 加载 .env
