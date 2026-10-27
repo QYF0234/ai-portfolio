@@ -2,6 +2,7 @@
 # 依赖：pip install openai requests python-dotenv
 import os
 import sys
+import time  # 【作业1新增】导入时间模块用于计算耗时
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import weekpath  # noqa: E402  跨周导入 + 加载 .env
@@ -68,27 +69,41 @@ class APIEngine:
 
 
 class LLM:
-    """统一入口：ask(prompt)。本地优先、云端兜底、**双向**异常自动切换。
+    """统一入口：ask(prompt)。本地优先、云端兜底、**双向**异常自动切换。"""
 
-    prefer='local'：本地挂了自动切云端；
-    prefer='api'  ：云端挂了（断网/超时/未配密钥）自动切本地。
-    两侧对称，任何一边失败都不会让程序直接崩——这正是"双引擎"存在的意义。
-    """
+    # =====================================================================
+    # 选择增强项：调用耗时与费用估算打印。
+    # 理由：作为教育应用开发者，需要评估高频调用的响应速度（耗时）以及可能产生的云端API费用。
+    # 本地模型不花钱，但云端按 Token 计费。加入耗时打印能直观看到双引擎的性能差异，方便后续做成本控制。
+    # =====================================================================
 
     def __init__(self, local_model=None):
         self.local = LocalEngine(local_model)
         self.api = APIEngine()
 
     def ask(self, prompt, prefer="local", **kw):
+        start_time = time.time()  # 记录开始时间
+        
         if prefer == "local":
             first, second, tag = self.local, self.api, "本地失败，自动切换云端"
         else:
             first, second, tag = self.api, self.local, "云端失败，自动切换本地"
+            
         try:
-            return first.ask(prompt, **kw)
+            result = first.ask(prompt, **kw)
         except Exception as e:
             print("[%s] %s" % (tag, e))
-            return second.ask(prompt, **kw)
+            result = second.ask(prompt, **kw)
+            
+        end_time = time.time()
+        cost_time = round(end_time - start_time, 2)
+        
+        # 简单的费用估算演示（假设云端每百万字符收费0.1元，实际按官方Token规则为准，此处仅作教学演示）
+        est_cost = (len(prompt) + len(result)) * 0.0000001
+        
+        print(f"\n--- ⏱️ 本次调用耗时: {cost_time} 秒 | 💰 估算费用: 约 ¥{est_cost:.6f} ---\n")
+        
+        return result
 
 
 if __name__ == "__main__":
